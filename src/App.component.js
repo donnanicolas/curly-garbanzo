@@ -1,10 +1,12 @@
 import R from 'ramda';
 import React, { Component } from 'react';
-import keymaster from 'keymaster';
+
+import keyManager from './libs/keyManager';
 
 import './App.css';
 
 const step = 3;
+let keyListener;
 
 type Props = {
   x: number,
@@ -20,14 +22,21 @@ class App extends Component {
       const { x, y, onMove } = this.props;
       onMove(x + xStep, y + yStep);
     }
-    keymaster('up', move(0, -step));
-    keymaster('right', move(step, 0));
-    keymaster('down', move(0, step));
-    keymaster('left', move(-step, 0));    
+
+    keyListener = keyManager({
+      up: move(0, -step),
+      down: move(0, step),
+      right: move(step, 0),
+      left: move(-step, 0),
+      upLeft: move(-step, -step),
+      upRight: move(step, -step),
+      downLeft: move(-step, step),
+      downRight: move(step, step)
+    });
   }
 
   componentWillUnmount() {
-    keymaster.unbind('down, up, left, right');
+    keyListener.unsubscribe();
   }
 
   render() {
@@ -40,4 +49,5 @@ class App extends Component {
 
   }
 }
+
 export default App;
