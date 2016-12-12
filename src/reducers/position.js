@@ -22,8 +22,8 @@ const startingStatus = { x: 10, y: 10 };
 export default handleActions({
     MOVE: (state, action: Action) => {
         // const { x, y } = action.payload;
-        const x = _.clamp(action.payload.x, 0, 96);
-        const y = _.clamp(action.payload.y, 0, 96);
+        const x = _.clamp(action.payload.x, 0, 296);
+        const y = _.clamp(action.payload.y, 0, 296);
 
         return { ...state, x, y };
     },

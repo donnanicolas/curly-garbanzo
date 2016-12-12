@@ -11,10 +11,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onMove: (x, y) => {
-      console.log(x, y)
-      dispatch(move(x, y))
-    }
+    onMove: (x, y) => dispatch(move(x, y))
   }
 }
 
