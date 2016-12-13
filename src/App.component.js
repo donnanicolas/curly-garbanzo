@@ -6,8 +6,8 @@ import Rx from 'rxjs';
 
 import './App.css';
 
-const step = 1;
-const fps = 20;
+const step = 2;
+const fps = 60;
 
 type Props = {
   x: number,
@@ -28,7 +28,6 @@ class App extends Component {
 
     const filterArrow = e => /Arrow[Down|Up|Left|Right]/.test(e.key)
     const mapToMoveArgs = e => {
-      console.log('ad', e);
       const r = R.always;
         const toMoveArgs =  R.cond([
           [R.equals('ArrowDown'), r([0, 1])],
@@ -66,9 +65,8 @@ class App extends Component {
           _.clamp(y + yStep, -1, 1),
         ];
       }, [0, 0])
-      .subscribe(([x, y]) => {
-        move(x * step, y * step)
-      });
+      .map(([x, y]) => [x * step, y * step])
+      .subscribe((args) => move(...args));
   }
 
   componentWillUnmount() {
