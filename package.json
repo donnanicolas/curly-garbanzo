@@ -7,6 +7,8 @@
     "react-scripts": "0.8.1"
   },
   "dependencies": {
+    "astar": "https://github.com/bgrins/javascript-astar#ef5ec96002f87f8ae9854c9a411e6f482d20ff35",
+    "easystarjs": "^0.3.1",
     "keymaster": "^1.6.2",
     "lodash": "^4.17.2",
     "ramda": "^0.22.1",
@@ -15,6 +17,7 @@
     "react-redux": "^4.4.6",
     "redux": "^3.6.0",
     "redux-actions": "^1.1.0",
+    "redux-observable": "^0.12.2",
     "rxjs-es": "^5.0.0-beta.12"
   },
   "scripts": {

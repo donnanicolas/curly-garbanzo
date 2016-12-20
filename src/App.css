@@ -1,12 +1,22 @@
-.App {
-    border: 1px solid;
-    height: 300px;
-    width: 300px;
+.App-img-walking {
+    position: absolute;
+    float: left;
+    z-index: 100;
+    transition: all 250ms linear;
 }
 
-.App-dot {
-    height: 5px;
-    width: 5px;
-    background: red;
-    position: relative;
+.App-grid-col {
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+.App-grid-0 {
+    background: black;
+    color: black;
+}
+
+.App-grid-1, .App-grid-2 {
+    color: white;
 }

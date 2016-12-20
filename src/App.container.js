@@ -1,17 +1,12 @@
 import { connect } from 'react-redux'
 import Component from './App.component'
-import { move } from './actions/movement';
+import { goto } from './actions/movement';
 
-const mapStateToProps = (state, ownProps) => {
-  return {
-    x: state.position.x,
-    y: state.position.y
-  }
-}
+const mapStateToProps = state => state.grid;
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    onMove: (x, y) => dispatch(move(x, y))
+    onMove: (from, to) => dispatch(goto(from, to))
   }
 }
 
