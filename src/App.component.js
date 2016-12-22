@@ -4,10 +4,13 @@ import React, { Component } from 'react';
 
 import './App.css';
 import walking from './walking.gif';
+import npc3 from './npc-3.gif';
 
 type Props = {
-  grid: [[number|string]],
+  grid: [[number]],
+  interact?: boolean,
   current: { x: number, y: number },
+  degree: number,
   onMove: (to: any) => any,
 };
 
@@ -70,24 +73,31 @@ class App extends Component {
   }
 
   render() {
-    const { grid, current, onMove } = this.props;
+    const width = 73.54;
+    const height = 36.77;
+    const { grid, current, onMove,interact, degree } = this.props;
+    const top = current.y * height/2 + current.x * height/2 - 5;
+    const left = current.y * width/2 - current.x * width/2 + 232;
+    const transform = `rotateX(60deg) rotateY(0deg) rotateZ(${degree}deg)`;
 
     return (
       <div className="App">
+        <div className="App-grid">
+          { grid.map((row, i) =>
+            <div className="App-grid-row" key={i}>
+              { row.map((col, j) =>
+                <div key={`${i}-${j}`} className={`App-grid-col App-grid-${col}`} onClick={() => onMove({ x: i, y: j})} >
+                  {col > 2 && <img src={npc3} alt={`npc-${col}`}/> }
+                </div> 
+              )}
+            </div>
+          )}
+        </div>
         <img src={walking} alt="walking" className="App-img-walking"
-          style={{ top: current.x * 52, left: current.y * 52 }}/>
-        { grid.map((row, i) =>
-          <div key={i}>
-            { row.map((col, j) =>
-              <div key={`${i}-${j}`} className={`App-grid-col App-grid-${col}`} onClick={() => onMove({ x: i, y: j})} >
-                {col}
-              </div> 
-            )}
-          </div>
-        )}
+          style={{ top, left, transform }}/>
+        { interact && <span>Hello</span> }
       </div>
     )
-
   }
 }
 export default App;
