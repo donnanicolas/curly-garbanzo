@@ -2,7 +2,11 @@
     position: absolute;
     float: left;
     z-index: 100;
-    transition: all 100ms linear;
+    transition: none 100ms linear;
+    transition-property: top, left;
+    background-image: url('/character.png');
+    height: 50px;
+    width: 30px;
 }
 
 .App-grid {

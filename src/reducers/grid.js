@@ -15,7 +15,7 @@ type State = {
     current: Position,
     goingTo?: Position,
     interact?: boolean,
-    degree: number
+    backgroundPosition: number
 };
 
 type Payload = {
@@ -58,11 +58,7 @@ const getActualTo = (grid: Grid, current: Position, to: Position) => {
         : Object.assign({}, to, { y: to.y + Math.sign(yDiff) })
 }
 
-const zeroToOne = z => z === 0 ? 1 : 0;
-const onlyPos = n => n > 0 ? n : 0;
-const onlyNeg = n => n < 0 ? n : 0;
-
-const moveTo = (state: State, action: Action): { grid: Grid, to: Position, interact: boolean, degree: number } => {
+const moveTo = (state: State, action: Action): { grid: Grid, to: Position, interact: boolean, backgroundPosition: number } => {
     const { current, grid } = _.clone(state);
     const { to } = action.payload;
 
@@ -70,28 +66,35 @@ const moveTo = (state: State, action: Action): { grid: Grid, to: Position, inter
     const xDiff = current.x - to.x;
     const yDiff = current.y - to.y;
 
-    console.log(xDiff, yDiff);
-    const degree = 0
-        + xDiff * -45
-        + yDiff * -45
-        - zeroToOne(xDiff) * onlyPos(yDiff) * 90 
-        - zeroToOne(yDiff) * onlyNeg(xDiff) * 90
-        + onlyNeg(xDiff) * onlyPos(yDiff) * 180; 
+    const equals = ([dstX, dstY]) => ([srcX, srcY]) => dstX === srcX && dstY === srcY;
+    const a = R.always;
+
+    const backgroundPosition = R.cond([
+        [equals([0, -1]), a(30)],
+        [equals([0, 1]), a(-95)],
+        [equals([-1, 0]), a(-30)],
+        [equals([1, 0]), a(95)],
+        [equals([1, 1]), a(129)],
+        [equals([-1, 1]), a(-65)],
+        [equals([1, -1]), a(65)],
+        [equals([-1, -1]), a(0)],
+        // [R.T, a(0)],
+    ])([xDiff, yDiff]);
 
     const actualTo = getActualTo(grid, current, to);
 
     grid[actualTo.x][actualTo.y] = 2;
-    return { grid, to: actualTo, interact: !_.isEqual(to, actualTo), degree };
+    return { grid, to: actualTo, interact: !_.isEqual(to, actualTo), backgroundPosition };
 }
 
-const startingStatus = { grid, current, goingTo: null, degree: 45 };
+const startingStatus = { grid, current, goingTo: null, backgroundPosition: 0 };
 export default handleActions({
     MOVE: (state: State, action: Action) => {
-        const { grid, to, interact, degree } = moveTo(state, action);
+        const { grid, to, interact, backgroundPosition } = moveTo(state, action);
         const goingTo = !_.isEqual(state.goingTo, to)
             ? state.goingTo
             : null;
-        return Object.assign({}, state, { grid, current: to, goingTo, interact, degree });
+        return Object.assign({}, state, { grid, current: to, goingTo, interact, backgroundPosition });
     },
     GOTO: (state: State, action: Action) => {
         const { to } = action.payload;
