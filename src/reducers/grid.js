@@ -1,41 +1,46 @@
 // @flow
+import type { Grid, Position, Direction, Action } from '../types.js';
+
 import _ from 'lodash';
 import R from 'ramda';
 import { handleActions } from 'redux-actions';
-
-type Grid = [[number]];
-
-type Position = {
-    x: number,
-    y: number
-}
 
 type State = {
     grid: Grid,
     current: Position,
     goingTo?: Position,
     interact?: boolean,
-    backgroundPosition: number
+    direction: Direction,
+    npc?: boolean,
 };
 
 type Payload = {
     to: Position,
 };
 
-type Action = {
-    payload: Payload,
-};
+type GridAction = Action<Payload, null>;
 
 const current: Position = { x: 0, y: 0 } 
 
+const emptyTile = { weight: 1 };
+const blockedTile = { weight: 0 };
+
+const NPC = {
+    id: 3,
+    direction: { x: 1, y: 1 },
+};
+
+const mainTile = Object.assign({}, { hasMain: true });
+const npcTile = Object.assign({}, { content: NPC, weight: 0, npc: true });
+
 const grid = [
-    [2, 1, 1, 1, 1, 0, 1],
-    [1, 1, 1, 1, 1, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 3000, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1],
+    [mainTile, emptyTile, emptyTile, emptyTile, emptyTile, blockedTile, emptyTile],
+    [emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, blockedTile, blockedTile],
+    [emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile],
+    [emptyTile, emptyTile, emptyTile, npcTile, emptyTile, emptyTile, emptyTile],
+    [emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile],
+    [emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile],
+    [emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile],
 ];
 
 const bigIfNotZero: (a: number) => number = R.ifElse(
@@ -47,7 +52,7 @@ const bigIfNotZero: (a: number) => number = R.ifElse(
 const getActualTo = (grid: Grid, current: Position, to: Position) => {
     const gridTo = grid[to.x][to.y];
 
-    if (gridTo <= 2) {
+    if (!gridTo.content) {
         return to;
     }
 
@@ -58,48 +63,37 @@ const getActualTo = (grid: Grid, current: Position, to: Position) => {
         : Object.assign({}, to, { y: to.y + Math.sign(yDiff) })
 }
 
-const moveTo = (state: State, action: Action): { grid: Grid, to: Position, interact: boolean, backgroundPosition: number } => {
+const moveTo = (state: State, action: GridAction): { grid: Grid, to: Position, interact: boolean, direction: Direction } => {
     const { current, grid } = _.clone(state);
     const { to } = action.payload;
 
-    grid[current.x][current.y] = 1
+    grid[current.x][current.y] = emptyTile;
     const xDiff = current.x - to.x;
     const yDiff = current.y - to.y;
 
-    const equals = ([dstX, dstY]) => ([srcX, srcY]) => dstX === srcX && dstY === srcY;
-    const a = R.always;
-
-    const backgroundPosition = R.cond([
-        [equals([0, -1]), a(30)],
-        [equals([0, 1]), a(-95)],
-        [equals([-1, 0]), a(-30)],
-        [equals([1, 0]), a(95)],
-        [equals([1, 1]), a(129)],
-        [equals([-1, 1]), a(-65)],
-        [equals([1, -1]), a(65)],
-        [equals([-1, -1]), a(0)],
-        // [R.T, a(0)],
-    ])([xDiff, yDiff]);
-
     const actualTo = getActualTo(grid, current, to);
 
-    grid[actualTo.x][actualTo.y] = 2;
-    return { grid, to: actualTo, interact: !_.isEqual(to, actualTo), backgroundPosition };
+    grid[actualTo.x][actualTo.y] = mainTile;
+    return { grid, to: actualTo, interact: !_.isEqual(to, actualTo), direction: { x: xDiff, y: yDiff} };
 }
 
-const startingStatus = { grid, current, goingTo: null, backgroundPosition: 0 };
+const startingStatus: State = { grid, current, direction: { x: 1, y: 1 } };
 export default handleActions({
-    MOVE: (state: State, action: Action) => {
-        const { grid, to, interact, backgroundPosition } = moveTo(state, action);
+    MOVE: (state: State, action: GridAction) => {
+        const { grid, to, interact, direction } = moveTo(state, action);
         const goingTo = !_.isEqual(state.goingTo, to)
             ? state.goingTo
             : null;
-        return Object.assign({}, state, { grid, current: to, goingTo, interact, backgroundPosition });
+        return Object.assign({}, state, { grid, current: to, goingTo, interact, direction });
     },
-    GOTO: (state: State, action: Action) => {
+    GOTO: (state: State, action: GridAction) => {
         const { to } = action.payload;
         const val = state.grid[to.x][to.y];
-        return val !== 0
+        if (val.npc) {
+            const actualTo = getActualTo(state.grid, state.current, to);
+            return Object.assign({}, state, { goingTo: actualTo })
+        }
+        return val.weight !== 0
             ? Object.assign({}, state, { goingTo: action.payload.to })
             : state;
     },

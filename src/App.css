@@ -4,7 +4,7 @@
     z-index: 100;
     transition: none 100ms linear;
     transition-property: top, left;
-    background-image: url('/character.png');
+    background-image: url('/images/character.png');
     height: 50px;
     width: 30px;
 }
@@ -26,14 +26,11 @@
     border: 1px solid black;
 }
 
-.App-grid-0 {
+.App-grid-blocked {
     background: black;
     color: black;
 }
 
 .App-grid-1, .App-grid-2 {
     color: white;
-}
-
-.App-grid-3000 {
 }
