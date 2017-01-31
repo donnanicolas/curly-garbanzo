@@ -5,6 +5,8 @@ import _ from 'lodash';
 import R from 'ramda';
 import { handleActions } from 'redux-actions';
 
+const merge = (...objects) => Object.assign({}, ...objects);
+
 type State = {
     grid: Grid,
     current: Position,
@@ -33,6 +35,7 @@ const NPC = {
 const mainTile = { hasMain: true };
 const npcTile = { content: NPC, weight: 3000, npc: true };
 
+// Draw a grid with some blocked tiles and an NCP
 const grid = [
     [mainTile, emptyTile, emptyTile, emptyTile, emptyTile, blockedTile, emptyTile],
     [emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, blockedTile, blockedTile],
@@ -43,12 +46,14 @@ const grid = [
     [emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile, emptyTile],
 ];
 
-const bigIfNotZero: (a: number) => number = R.ifElse(
+// Return a big number if the value is zero
+const bigIfZero: (a: number) => number = R.ifElse(
     R.equals(0),
     R.always(100000),
     R.identity
 )
 
+// This function avoids stepping on NCP
 const getActualTo = (grid: Grid, current: Position, to: Position) => {
     const gridTo = grid[to.x][to.y];
 
@@ -56,11 +61,13 @@ const getActualTo = (grid: Grid, current: Position, to: Position) => {
         return to;
     }
 
-    const xDiff = bigIfNotZero(current.x - to.x);
-    const yDiff = bigIfNotZero(current.y - to.y);
+    const xDiff = bigIfZero(current.x - to.x);
+    const yDiff = bigIfZero(current.y - to.y);
+
+    // if the target position has content, then move to one in a position 1 Tile (x or y) less in the direction we are moving from
     return Math.abs(xDiff) < Math.abs(yDiff)
-        ? Object.assign({}, to, { x: to.x + Math.sign(xDiff) })
-        : Object.assign({}, to, { y: to.y + Math.sign(yDiff) })
+        ? merge(to, { x: to.x + Math.sign(xDiff) })
+        : merge(to, { y: to.y + Math.sign(yDiff) })
 }
 
 const moveTo = (state: State, action: GridAction): { grid: Grid, to: Position, interact: boolean, direction: Direction } => {
@@ -84,14 +91,14 @@ export default handleActions({
         const goingTo = !_.isEqual(state.goingTo, to)
             ? state.goingTo
             : null;
-        return Object.assign({}, state, { grid, current: to, goingTo, interact, direction });
+        return merge(state, { grid, current: to, goingTo, interact, direction });
     },
     GOTO: (state: State, action: GridAction) => {
         const { to } = action.payload;
         const val = state.grid[to.x][to.y];
 
         return val.weight !== 0
-            ? Object.assign({}, state, { goingTo: action.payload.to })
+            ? merge(state, { goingTo: action.payload.to })
             : state;
     },
 }, startingStatus);
