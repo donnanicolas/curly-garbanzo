@@ -30,8 +30,8 @@ const NPC = {
     direction: { x: 1, y: 1 },
 };
 
-const mainTile = Object.assign({}, { hasMain: true });
-const npcTile = Object.assign({}, { content: NPC, weight: 0, npc: true });
+const mainTile = { hasMain: true };
+const npcTile = { content: NPC, weight: 3000, npc: true };
 
 const grid = [
     [mainTile, emptyTile, emptyTile, emptyTile, emptyTile, blockedTile, emptyTile],
@@ -89,10 +89,7 @@ export default handleActions({
     GOTO: (state: State, action: GridAction) => {
         const { to } = action.payload;
         const val = state.grid[to.x][to.y];
-        if (val.npc) {
-            const actualTo = getActualTo(state.grid, state.current, to);
-            return Object.assign({}, state, { goingTo: actualTo })
-        }
+
         return val.weight !== 0
             ? Object.assign({}, state, { goingTo: action.payload.to })
             : state;
