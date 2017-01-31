@@ -9,6 +9,10 @@ const moveEpic = (action$: any, { getState, dispatch }: any) =>
     .mergeMap(action => {
       const state = getState();
 
+      if (!state.grid.goingTo) {
+        return Rx.Observable.empty();
+      }
+
       const weightGrid = state.grid.grid.map(col => 
         col.map(tile => tile.weight)
       );
