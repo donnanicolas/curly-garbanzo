@@ -1,12 +1,36 @@
-.App {
-    border: 1px solid;
-    height: 300px;
-    width: 300px;
+.App-img-walking {
+    position: absolute;
+    float: left;
+    z-index: 100;
+    transition: none 100ms linear;
+    transition-property: top, left;
+    background-image: url('/images/character.png');
+    height: 50px;
+    width: 30px;
 }
 
-.App-dot {
-    height: 5px;
-    width: 5px;
-    background: red;
-    position: relative;
+.App-grid {
+    transform: rotateX(60deg) rotateY(0deg) rotateZ(45deg);
+    top: -53px;
+    left: 75px;
+    position: absolute;
+}
+
+.App-grid-row {
+    max-height: 52px; 
+}
+.App-grid-col {
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+.App-grid-blocked {
+    background: black;
+    color: black;
+}
+
+.App-grid-1, .App-grid-2 {
+    color: white;
 }

@@ -3,6 +3,9 @@ import { createActions } from 'redux-actions';
 
 export const {
     move,
+    goto,
+    stop
 } = createActions({
-    MOVE: (x: number, y: number) => ({ x, y }),
+    MOVE: (to: any) => ({ to }),
+    GOTO: (to: any) => ({ to }),
 });

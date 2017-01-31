@@ -1,88 +1,75 @@
 // @flow
+import type { Grid, Position, Direction, Tile } from './types.js';
+
 import _ from 'lodash';
 import R from 'ramda';
 import React, { Component } from 'react';
-import Rx from 'rxjs';
 
 import './App.css';
 
-const step = 1;
-const fps = 20;
-
 type Props = {
-  x: number,
-  y: number,
-  onMove: (x: number, y: number) => any,
+  grid: Grid,
+  interact?: boolean,
+  current: Position,
+  direction: Direction,
+  onMove: (to: any) => any,
 };
 
 class App extends Component {
   props: Props
 
-  timerSub: any
+  render() {
+    const width = 73.54;
+    const height = 36.77;
+    const { grid, current, onMove,interact, direction } = this.props;
+    const top = current.y * height/2 + current.x * height/2 - 23;
+    const left = current.y * width/2 - current.x * width/2 + 244;
 
-  componentDidMount() {
-    const move = (xStep, yStep) => {
-      const { x, y, onMove } = this.props;
-      onMove(x + xStep, y + yStep);
-    }
+    const equals = ([dstX, dstY]) => ([srcX, srcY]) => dstX === srcX && dstY === srcY;
+    const a = R.always;
 
-    const filterArrow = e => /Arrow[Down|Up|Left|Right]/.test(e.key)
-    const mapToMoveArgs = e => {
-      console.log('ad', e);
-      const r = R.always;
-        const toMoveArgs =  R.cond([
-          [R.equals('ArrowDown'), r([0, 1])],
-          [R.equals('ArrowUp'), r([0, -1])],
-          [R.equals('ArrowLeft'), r([-1, 0])],
-          [R.equals('ArrowRight'), r([1, 0])],
-        ])
-        return toMoveArgs(e.key);
+    const backgroundPosition = R.cond([
+        [equals([0, -1]), a(30)],
+        [equals([0, 1]), a(-95)],
+        [equals([-1, 0]), a(-30)],
+        [equals([1, 0]), a(95)],
+        [equals([1, 1]), a(129)],
+        [equals([-1, 1]), a(-65)],
+        [equals([1, -1]), a(65)],
+        [equals([-1, -1]), a(0)],
+        [R.T, a(0)],
+    ])([direction.x, direction.y]);
+
+    const getTileId = (col: Tile) => {
+      if (col.content) {
+        return col.content.id;
+      }
+      return col.weight === 0
+        ? 'blocked'
+        : 'empty';
     };
 
-    const keyDowns = Rx.Observable.fromEvent(document, 'keydown')
-      .filter(filterArrow)
-      .map(mapToMoveArgs);
-
-
-    const keyUps = Rx.Observable.fromEvent(document, 'keyup')
-      .filter(filterArrow)
-      .map(mapToMoveArgs)
-      .map(([x, y]) => [-x, -y]);
-    
-    // keyUps.subscribe(console.log)
-
-    const timer = Rx.Observable.interval(1000 / fps);
-
-    this.timerSub = timer
-      .merge(keyUps)
-      .merge(keyDowns)
-      .scan(([x, y], e) => {
-        if (!_.isArray(e)) {
-          return [x, y];
-        }
-        const [xStep, yStep] = e;
-        return [
-          _.clamp(x + xStep, -1, 1),
-          _.clamp(y + yStep, -1, 1),
-        ];
-      }, [0, 0])
-      .subscribe(([x, y]) => {
-        move(x * step, y * step)
-      });
-  }
-
-  componentWillUnmount() {
-    this.timerSub.unsubscribe();
-  }
-
-  render() {
-    const { x, y } = this.props;
     return (
       <div className="App">
-        <div className="App-dot" style={{ top: y, left: x }}></div>
+        <div className="App-grid">
+          { grid.map((row, i) =>
+            <div className="App-grid-row" key={i}>
+              { row.map((tile, j) =>
+                <div key={`${i}-${j}`} className={`App-grid-col App-grid-${getTileId(tile)}`} onClick={() => onMove({ x: i, y: j})} >
+                  {tile.content && <img src={`/images/npc-${tile.content.id}.gif`} alt={`npc-${tile.content.id}`}/> }
+                </div> 
+              )}
+            </div>
+          )}
+        </div>
+        <div className="App-img-walking"
+          style={{ top, left, backgroundPosition }}
+          ></div>
+        { interact && <span>Hello</span> }
       </div>
     )
-
   }
 }
+        // <img src={walking} alt="walking" className="App-img-walking"
+        //   style={{ top, left, transform }}/>
 export default App;

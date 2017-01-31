@@ -1,14 +1,9 @@
-import { combineReducers } from 'redux'
+import { combineReducers } from 'redux';
 
-import position from './position'
-
-// export type State = {
-//     auth: Auth,
-//     ui: UI
-// }
+import grid from './grid';
 
 const gameApp = combineReducers({
-    position,
+    grid,
 });
 
 export default gameApp;
